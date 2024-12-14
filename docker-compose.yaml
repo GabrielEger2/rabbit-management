@@ -1,0 +1,28 @@
+version: '3.8'
+
+networks:
+  kong-net:
+    name: kong-net
+    driver: bridge
+
+  service-db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=service_db
+    networks:
+      - kong-net
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - service-db
+    networks:
+      - kong-net
