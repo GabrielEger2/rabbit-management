@@ -3,7 +3,7 @@ import jwt
 import datetime
 from fastapi import HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from common import get_db
+from common.postgres import get_db
 from models import UserModel
 from typing import Optional
 from schemas import Token, AccessToken

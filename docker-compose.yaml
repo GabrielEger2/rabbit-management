@@ -24,7 +24,24 @@ services:
     command: >
       bash -c "sleep 5 &&
               alembic -c /usr/src/apps/users/alembic.ini upgrade head &&
-               uvicorn main:app --host 0.0.0.0 --port 8002 --reload"
+              uvicorn main:app --host 0.0.0.0 --port 8002 --reload"
+
+  trips:
+    build:
+      context: .
+      dockerfile: ./apps/trips/Dockerfile
+    env_file:
+      - ./apps/trips/.env
+    volumes:
+      - ./apps/trips:/usr/src/apps/trips
+      - ./common:/usr/src/apps/trips/common
+    ports:
+      - 8003:8003
+    networks:
+      - kong-net
+    command: >
+      bash -c "sleep 5 &&
+              uvicorn main:app --host 0.0.0.0 --port 8003 --reload"
 
   postgres-db:
     image: postgres:13

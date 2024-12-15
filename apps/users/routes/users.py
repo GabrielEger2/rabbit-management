@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from fastapi import APIRouter, Query, Path, Depends
 from schemas import UsersPublic, UserPublic, UserCreate, UserUpdate
-from common import Unauthorized
+from common.schemas import Unauthorized
 from typing import Optional
 from services import UserService, get_user_service
 

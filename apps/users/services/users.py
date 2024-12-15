@@ -4,10 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import List, Optional
 from schemas import UsersPublic, UserPublic, UserUpdate
-from common import get_db
+from common.postgres import get_db
 from models import UserModel
 from http import HTTPStatus
-from common import get_total_count, paginate_query
+from common.postgres import get_total_count, paginate_query
 
 
 class UserService:
