@@ -1,9 +1,11 @@
 version: '3.7'
 volumes:
   kong_data: {}
+
 networks:
   kong-net:
-    external: false
+    external: true
+
 services:
   kong-migrations:
     image: "${KONG_DOCKER_TAG:-kong:latest}"

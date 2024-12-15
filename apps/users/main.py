@@ -4,7 +4,6 @@ from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from routes import users_router, auth_router, admin_router
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
 load_dotenv()
 
 tags_metadata = [
@@ -47,7 +46,6 @@ security_scheme = {
 }
 
 
-# Custom OpenAPI documentation
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema

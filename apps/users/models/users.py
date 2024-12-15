@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import datetime
 from .base import Base
 
+
 class UserModel(Base):
     __tablename__ = "users"
 
