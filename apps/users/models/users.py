@@ -1,12 +1,9 @@
 from sqlalchemy.orm import Mapped, mapped_column
-from common import table_registry
 from dataclasses import dataclass
 import datetime
+from .base import Base
 
-
-@dataclass(init=False)
-@table_registry.mapped_as_dataclass
-class UserModel:
+class UserModel(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -28,6 +25,6 @@ class UserModel:
         self.username = username
         self.email = email
         self.password = password
-        self.is_active = True
+        self.is_active = is_active
         self.level = level
         self.joined = datetime.datetime.now().isoformat()

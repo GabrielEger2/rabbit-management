@@ -18,7 +18,7 @@ router = APIRouter()
 )
 async def read_users(
     page: Optional[int] = Query(
-        None,
+        ...,
         ge=1,
         description="Page number, must be greater than or equal to 1",
         missing=1,

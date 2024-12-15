@@ -4,5 +4,5 @@ startapp:
 startkong:
 	cd kong && docker-compose up
 
-lint:
-	black .
+postgres-migrate:
+	docker-compose run $(SERVICE) alembic revision --autogenerate -m "$(MESSAGE)"

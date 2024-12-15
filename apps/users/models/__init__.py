@@ -1,1 +1,2 @@
-from .users import UserModel
+from .users import *
+from .base import Base
