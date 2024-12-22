@@ -12,6 +12,5 @@ router = APIRouter()
     summary="Retrieve Users",
     description="Retrieve a list of users with pagination and optional sorting.",
 )
-async def read_users(
-):
+async def read_users():
     return await 42

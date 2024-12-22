@@ -42,3 +42,5 @@ asyncpg==0.29.0
 alembic==1.13.2
 psycopg2-binary==2.9.9
 PyJWT==2.9.0
+aioredis==2.0.1
+orjson==3.10.12

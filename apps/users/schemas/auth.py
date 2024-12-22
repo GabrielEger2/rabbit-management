@@ -8,16 +8,12 @@ class AccessToken(SQLModel):
 
 
 class Token(AccessToken):
-    refresh_token: str
+    pass
 
 
 class UserLogin(SQLModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=100)
-
-
-class TokenRefresh(SQLModel):
-    refresh_token: str
 
 
 class Logout(SQLModel):

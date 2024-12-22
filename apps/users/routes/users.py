@@ -37,6 +37,20 @@ async def read_users(
 ):
     return await service.get_users(page, order, sort, username)
 
+@router.get(
+    "/{user_id}",
+    status_code=HTTPStatus.OK,
+    response_model=UserPublic,
+    responses={401: {"model": Unauthorized}},
+    summary="Retrieve User",
+    description="Retrieve a single user.",
+)
+async def read_user(
+    user_id: int = Path(..., ge=1, description="ID of the user to retrieve"),
+    service: UserService = Depends(get_user_service),
+):
+    return await service.get_user(user_id)
+
 
 @router.post(
     "/",
