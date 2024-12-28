@@ -37,6 +37,7 @@ async def read_users(
 ):
     return await service.get_users(page, order, sort, username)
 
+
 @router.get(
     "/{user_id}",
     status_code=HTTPStatus.OK,

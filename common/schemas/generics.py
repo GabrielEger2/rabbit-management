@@ -1,12 +1,12 @@
-from sqlmodel import Field, Relationship, SQLModel
+from pydantic import BaseModel
 
 
 # Generic message
-class Message(SQLModel):
+class Message(BaseModel):
     message: str
 
 
 # Generic Unauthorized
-class Unauthorized(SQLModel):
+class Unauthorized(BaseModel):
     message: str
     request_id: str

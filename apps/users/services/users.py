@@ -10,7 +10,12 @@ from common.redis import redis_client
 from models import UserModel
 from http import HTTPStatus
 from common.postgres import get_total_count, paginate_query
-from common.redis import cache_with_expiry, cache_with_sliding_expiry, invalidate_cache, invalidate_pattern_cache
+from common.redis import (
+    cache_with_expiry,
+    cache_with_sliding_expiry,
+    invalidate_cache,
+    invalidate_pattern_cache,
+)
 
 
 class UserService:
@@ -26,17 +31,19 @@ class UserService:
 
         async def fetch_users():
             query = self._build_user_query(order, sort, username)
-            total_count = await get_total_count(self.db_session, query)
-            users = await paginate_query(self.db_session, query, page, 25)
-
+            users = await paginate_query(self.db_session, query, page, 26)
             users_public = [UserPublic.from_orm(user) for user in users]
 
-            total_pages = (total_count + 25 - 1) // 25
+            next_page = None
+
+            if len(users_public) > 25:
+                next_page = page + 1
+                users_public = users_public[:25]
 
             return {
                 "data": [user.dict() for user in users_public],
                 "page": page,
-                "total_pages": total_pages,
+                "next": next_page,
             }
 
         cached_result = await cache_with_expiry(cache_key, fetch_users, ttl=300)
@@ -44,9 +51,9 @@ class UserService:
         return UsersPublic(
             data=[UserPublic(**user) for user in cached_result["data"]],
             page=cached_result["page"],
-            total_pages=cached_result["total_pages"],
+            next=cached_result.get("next"),
         )
-    
+
     async def get_user(self, user_id: int) -> UserPublic:
         cache_key = f"user:details:{user_id}"
 
@@ -126,20 +133,6 @@ class UserService:
 
         await invalidate_cache(f"user:details:{user_id}")
         await invalidate_pattern_cache("users:*")
-
-    async def get_user_by_id(self, user_id: int) -> UserPublic:
-        cache_key = f"user:details:{user_id}"
-
-        async def fetch_user():
-            db_user = await self._get_user_by_id(user_id)
-            if not db_user:
-                raise HTTPException(
-                    status_code=HTTPStatus.NOT_FOUND, detail="User not found"
-                )
-            return UserPublic.from_orm(db_user).dict()
-
-        cached_user = await cache_with_sliding_expiry(cache_key, fetch_user, ttl=300)
-        return UserPublic(**cached_user)
 
     def _hash_password(self, password: str) -> str:
         return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")

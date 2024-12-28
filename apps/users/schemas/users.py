@@ -20,7 +20,7 @@ class UserPublic(UserBase):
 class UsersPublic(SQLModel):
     data: List[UserPublic]
     page: int
-    total_pages: int
+    next: Optional[str]
 
 
 class UserCreate(UserBase):

@@ -1,8 +1,8 @@
-from pydantic import EmailStr
+from pydantic import EmailStr, BaseModel
 from sqlmodel import Field, SQLModel
 
 
-class AccessToken(SQLModel):
+class AccessToken(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
@@ -16,5 +16,5 @@ class UserLogin(SQLModel):
     password: str = Field(min_length=8, max_length=100)
 
 
-class Logout(SQLModel):
+class Logout(BaseModel):
     token: str
