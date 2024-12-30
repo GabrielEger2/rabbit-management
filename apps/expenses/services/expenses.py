@@ -12,17 +12,24 @@ from fastapi import HTTPException
 import re
 from bson import ObjectId
 
+
 class ExpenseService:
     def __init__(self, expenses_collection: any):
         self.expenses_collection = expenses_collection
 
-    async def get_expenses(self, page: int, order: str, sort: str, type_filter: Optional[str] = None) -> ExpensesPublic:
+    async def get_expenses(
+        self, page: int, order: str, sort: str, type_filter: Optional[str] = None
+    ) -> ExpensesPublic:
         cache_key = f"expenses:page={page}:order={order}:sort={sort}:type={type_filter or 'all'}"
 
         async def fetch_expenses():
             query = self._build_expense_query(type_filter)
             sort_order = -1 if order == "desc" else 1
-            sort_field = sort if sort in ["amount", "incurred_date", "created_at"] else "created_at"
+            sort_field = (
+                sort
+                if sort in ["amount", "incurred_date", "created_at"]
+                else "created_at"
+            )
 
             expenses = (
                 self.expenses_collection.find(query)
@@ -32,7 +39,9 @@ class ExpenseService:
                 .to_list(26)
             )
 
-            expenses_public = [ExpensePublic(**self._format_expense(expense)) for expense in expenses]
+            expenses_public = [
+                ExpensePublic(**self._format_expense(expense)) for expense in expenses
+            ]
 
             next_page = None
             if len(expenses_public) > 25:
@@ -67,7 +76,9 @@ class ExpenseService:
                 )
             return self._format_expense(expense)
 
-        cached_expense = await cache_with_sliding_expiry(cache_key, fetch_expense, ttl=300)
+        cached_expense = await cache_with_sliding_expiry(
+            cache_key, fetch_expense, ttl=300
+        )
         return ExpensePublic(**cached_expense)
 
     async def create_expense(self, expense: dict) -> ExpensePublic:
@@ -79,7 +90,9 @@ class ExpenseService:
         await invalidate_pattern_cache("expenses:*")
         return ExpensePublic(**self._format_expense(expense))
 
-    async def update_expense(self, expense_id: str, expense_update: dict) -> ExpensePublic:
+    async def update_expense(
+        self, expense_id: str, expense_update: dict
+    ) -> ExpensePublic:
         if not self._is_valid_object_id(expense_id):
             raise HTTPException(status_code=400, detail="Invalid expense ID format")
 
@@ -93,7 +106,9 @@ class ExpenseService:
                 status_code=404, detail=f"Expense with ID {expense_id} not found"
             )
 
-        updated_expense = self.expenses_collection.find_one({"_id": ObjectId(expense_id)})
+        updated_expense = self.expenses_collection.find_one(
+            {"_id": ObjectId(expense_id)}
+        )
         await invalidate_cache(f"expense:details:{expense_id}")
         await invalidate_pattern_cache("expenses:*")
         return ExpensePublic(**self._format_expense(updated_expense))
@@ -102,7 +117,9 @@ class ExpenseService:
         if not self._is_valid_object_id(expense_id):
             raise HTTPException(status_code=400, detail="Invalid expense ID format")
 
-        delete_result = self.expenses_collection.delete_one({"_id": ObjectId(expense_id)})
+        delete_result = self.expenses_collection.delete_one(
+            {"_id": ObjectId(expense_id)}
+        )
         if delete_result.deleted_count == 0:
             raise HTTPException(
                 status_code=404, detail=f"Expense with ID {expense_id} not found"

@@ -73,4 +73,6 @@ async def redoc_html():
 
 @app.get("/expenses-swagger", include_in_schema=False)
 async def swagger_html():
-    return get_swagger_ui_html(openapi_url="/api-expenses/openapi.json", title=app.title)
+    return get_swagger_ui_html(
+        openapi_url="/api-expenses/openapi.json", title=app.title
+    )

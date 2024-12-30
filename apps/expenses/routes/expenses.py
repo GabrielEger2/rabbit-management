@@ -7,6 +7,7 @@ from services import ExpenseService, get_expense_service
 
 router = APIRouter()
 
+
 @router.get(
     "/",
     status_code=HTTPStatus.OK,
@@ -16,9 +17,17 @@ router = APIRouter()
     description="Retrieve a list of expenses with pagination and optional filtering.",
 )
 async def read_expenses(
-    page: Optional[int] = Query(1, ge=1, description="Page number, must be greater than or equal to 1"),
-    order: Optional[str] = Query(None, regex="^(asc|desc)$", description="Order type: [asc, desc]"),
-    sort: Optional[str] = Query(None, regex="^(amount|incurred_date|created_at)$", description="Sort by fields like [amount, incurred_date, created_at]"),
+    page: Optional[int] = Query(
+        1, ge=1, description="Page number, must be greater than or equal to 1"
+    ),
+    order: Optional[str] = Query(
+        None, regex="^(asc|desc)$", description="Order type: [asc, desc]"
+    ),
+    sort: Optional[str] = Query(
+        None,
+        regex="^(amount|incurred_date|created_at)$",
+        description="Sort by fields like [amount, incurred_date, created_at]",
+    ),
     type_filter: Optional[str] = Query(None, description="Filter by expense type"),
     service: ExpenseService = Depends(get_expense_service),
 ):

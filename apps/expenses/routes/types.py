@@ -1,11 +1,17 @@
 from http import HTTPStatus
 from fastapi import APIRouter, Query, Path, Depends
-from schemas import ExpenseTypesPublic, ExpenseTypePublic, ExpenseTypeCreate, ExpenseTypeUpdate
+from schemas import (
+    ExpenseTypesPublic,
+    ExpenseTypePublic,
+    ExpenseTypeCreate,
+    ExpenseTypeUpdate,
+)
 from common.schemas import Unauthorized
 from typing import Optional
 from services import ExpenseTypeService, get_expense_type_service
 
 router = APIRouter()
+
 
 @router.get(
     "/",
@@ -16,9 +22,15 @@ router = APIRouter()
     description="Retrieve a list of expense types with pagination and optional sorting.",
 )
 async def read_expense_types(
-    page: Optional[int] = Query(1, ge=1, description="Page number, must be greater than or equal to 1"),
-    order: Optional[str] = Query(None, regex="^(asc|desc)$", description="Order type: [asc, desc]"),
-    sort: Optional[str] = Query(None, regex="^(name|created_at)$", description="Sort type: [name, created_at]"),
+    page: Optional[int] = Query(
+        1, ge=1, description="Page number, must be greater than or equal to 1"
+    ),
+    order: Optional[str] = Query(
+        None, regex="^(asc|desc)$", description="Order type: [asc, desc]"
+    ),
+    sort: Optional[str] = Query(
+        None, regex="^(name|created_at)$", description="Sort type: [name, created_at]"
+    ),
     service: ExpenseTypeService = Depends(get_expense_type_service),
 ):
     return await service.get_expense_types(page, order, sort)

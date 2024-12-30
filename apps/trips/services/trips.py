@@ -12,6 +12,7 @@ from fastapi import HTTPException
 import re
 from bson import ObjectId
 
+
 class TripService:
     def __init__(self, trips_collection: any):
         self.trips_collection = trips_collection
@@ -131,7 +132,6 @@ class TripService:
             trip.get("updated_at").isoformat() if "updated_at" in trip else None
         )
         return trip
-
 
     @staticmethod
     def _is_valid_object_id(object_id: str) -> bool:

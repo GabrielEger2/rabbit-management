@@ -12,11 +12,14 @@ from fastapi import HTTPException
 import re
 from bson import ObjectId
 
+
 class ExpenseTypeService:
     def __init__(self, expense_types_collection: any):
         self.expense_types_collection = expense_types_collection
 
-    async def get_expense_types(self, page: int, order: str, sort: str) -> ExpenseTypesPublic:
+    async def get_expense_types(
+        self, page: int, order: str, sort: str
+    ) -> ExpenseTypesPublic:
         cache_key = f"expense_types:page={page}:order={order}:sort={sort}"
 
         async def fetch_expense_types():
@@ -31,7 +34,10 @@ class ExpenseTypeService:
                 .to_list(26)
             )
 
-            expense_types_public = [ExpenseTypePublic(**self._format_expense_type(exp)) for exp in expense_types]
+            expense_types_public = [
+                ExpenseTypePublic(**self._format_expense_type(exp))
+                for exp in expense_types
+            ]
 
             next_page = None
             if len(expense_types_public) > 25:
@@ -47,26 +53,36 @@ class ExpenseTypeService:
         cached_result = await cache_with_expiry(cache_key, fetch_expense_types, ttl=300)
 
         return ExpenseTypesPublic(
-            data=[ExpenseTypePublic(**expense_type) for expense_type in cached_result["data"]],
+            data=[
+                ExpenseTypePublic(**expense_type)
+                for expense_type in cached_result["data"]
+            ],
             page=cached_result["page"],
             next=cached_result.get("next"),
         )
 
     async def get_expense_type(self, expense_type_id: str) -> ExpenseTypePublic:
         if not self._is_valid_object_id(expense_type_id):
-            raise HTTPException(status_code=400, detail="Invalid expense type ID format")
+            raise HTTPException(
+                status_code=400, detail="Invalid expense type ID format"
+            )
 
         cache_key = f"expense_type:details:{expense_type_id}"
 
         async def fetch_expense_type():
-            expense_type = self.expense_types_collection.find_one({"_id": ObjectId(expense_type_id)})
+            expense_type = self.expense_types_collection.find_one(
+                {"_id": ObjectId(expense_type_id)}
+            )
             if not expense_type:
                 raise HTTPException(
-                    status_code=404, detail=f"Expense type with ID {expense_type_id} not found"
+                    status_code=404,
+                    detail=f"Expense type with ID {expense_type_id} not found",
                 )
             return self._format_expense_type(expense_type)
 
-        cached_expense_type = await cache_with_sliding_expiry(cache_key, fetch_expense_type, ttl=300)
+        cached_expense_type = await cache_with_sliding_expiry(
+            cache_key, fetch_expense_type, ttl=300
+        )
         return ExpenseTypePublic(**cached_expense_type)
 
     async def create_expense_type(self, expense_type: dict) -> ExpenseTypePublic:
@@ -78,9 +94,13 @@ class ExpenseTypeService:
         await invalidate_pattern_cache("expense_types:*")
         return ExpenseTypePublic(**self._format_expense_type(expense_type))
 
-    async def update_expense_type(self, expense_type_id: str, expense_type_update: dict) -> ExpenseTypePublic:
+    async def update_expense_type(
+        self, expense_type_id: str, expense_type_update: dict
+    ) -> ExpenseTypePublic:
         if not self._is_valid_object_id(expense_type_id):
-            raise HTTPException(status_code=400, detail="Invalid expense type ID format")
+            raise HTTPException(
+                status_code=400, detail="Invalid expense type ID format"
+            )
 
         expense_type_update["updated_at"] = datetime.utcnow()
         update_result = self.expense_types_collection.update_one(
@@ -89,22 +109,30 @@ class ExpenseTypeService:
 
         if update_result.matched_count == 0:
             raise HTTPException(
-                status_code=404, detail=f"Expense type with ID {expense_type_id} not found"
+                status_code=404,
+                detail=f"Expense type with ID {expense_type_id} not found",
             )
 
-        updated_expense_type = self.expense_types_collection.find_one({"_id": ObjectId(expense_type_id)})
+        updated_expense_type = self.expense_types_collection.find_one(
+            {"_id": ObjectId(expense_type_id)}
+        )
         await invalidate_cache(f"expense_type:details:{expense_type_id}")
         await invalidate_pattern_cache("expense_types:*")
         return ExpenseTypePublic(**self._format_expense_type(updated_expense_type))
 
     async def delete_expense_type(self, expense_type_id: str) -> None:
         if not self._is_valid_object_id(expense_type_id):
-            raise HTTPException(status_code=400, detail="Invalid expense type ID format")
+            raise HTTPException(
+                status_code=400, detail="Invalid expense type ID format"
+            )
 
-        delete_result = self.expense_types_collection.delete_one({"_id": ObjectId(expense_type_id)})
+        delete_result = self.expense_types_collection.delete_one(
+            {"_id": ObjectId(expense_type_id)}
+        )
         if delete_result.deleted_count == 0:
             raise HTTPException(
-                status_code=404, detail=f"Expense type with ID {expense_type_id} not found"
+                status_code=404,
+                detail=f"Expense type with ID {expense_type_id} not found",
             )
 
         await invalidate_cache(f"expense_type:details:{expense_type_id}")
@@ -116,10 +144,14 @@ class ExpenseTypeService:
         expense_type["id"] = str(expense_type["_id"])
         expense_type.pop("_id", None)
         expense_type["created_at"] = (
-            expense_type.get("created_at").isoformat() if "created_at" in expense_type else None
+            expense_type.get("created_at").isoformat()
+            if "created_at" in expense_type
+            else None
         )
         expense_type["updated_at"] = (
-            expense_type.get("updated_at").isoformat() if "updated_at" in expense_type else None
+            expense_type.get("updated_at").isoformat()
+            if "updated_at" in expense_type
+            else None
         )
         return expense_type
 

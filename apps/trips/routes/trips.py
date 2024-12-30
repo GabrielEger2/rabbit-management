@@ -37,6 +37,7 @@ async def read_trips(
 ):
     return await service.get_trips(page, order, sort, name)
 
+
 @router.get(
     "/{trip_id}",
     status_code=HTTPStatus.OK,
