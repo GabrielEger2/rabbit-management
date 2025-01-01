@@ -52,13 +52,16 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
-        connection.execute(text("CREATE SCHEMA IF NOT EXISTS users_alembic_versions"))
+        connection.execute(
+            text("CREATE SCHEMA IF NOT EXISTS reimbursements_alembic_versions")
+        )
         connection.execute(text("COMMIT"))
+
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            version_table_schema="users_alembic_versions",
-            version_table="users_alembic_versions",
+            version_table_schema="reimbursements_alembic_versions",
+            version_table="reimbursements_alembic_version",
         )
 
         with context.begin_transaction():
