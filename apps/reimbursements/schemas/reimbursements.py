@@ -1,6 +1,7 @@
 from typing import List, Optional
 from sqlmodel import SQLModel, Field
 import datetime
+from pydantic import BaseModel
 
 
 class ReimbursementBase(SQLModel):
@@ -31,3 +32,6 @@ class ReimbursementUpdate(SQLModel):
     status: Optional[str]
     expense_ids: Optional[List[int]]
     total_amount: Optional[float]
+
+class ReimbursementCreatePublic(BaseModel):
+    message: str

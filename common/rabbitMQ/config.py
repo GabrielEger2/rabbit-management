@@ -20,14 +20,17 @@ class RabbitMQConnection:
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue=self.queue, durable=True)
 
-    def publish(self, message: dict, routing_key: str = None):
+    def publish(self, message: dict, routing_key: str = None, headers: dict = None):
         if not self.channel:
             self.connect()
         self.channel.basic_publish(
             exchange="",
             routing_key=routing_key or self.queue,
             body=json.dumps(message),
-            properties=pika.BasicProperties(delivery_mode=2),
+            properties=pika.BasicProperties(
+                headers=headers,
+                delivery_mode=2,
+            ),
         )
 
     def consume(self, callback):

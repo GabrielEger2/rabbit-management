@@ -1,8 +1,11 @@
-FROM python:3.8-slim
+FROM golang:1.23
 
-WORKDIR /usr/src/workers/reimbursements
+WORKDIR /usr/src/apps/workers/reimbursements
 
-COPY  common ./common
-COPY apps/workers/reimbursements .
+COPY /apps/workers/reimbursements .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN go mod download
+
+RUN go build -o main .
+
+CMD ["./main"]

@@ -5,6 +5,7 @@ from schemas import (
     ReimbursementPublic,
     ReimbursementCreate,
     ReimbursementUpdate,
+    ReimbursementCreatePublic
 )
 from common.schemas import Unauthorized
 from typing import Optional
@@ -53,7 +54,7 @@ async def read_reimbursement(
 @router.post(
     "/",
     status_code=HTTPStatus.CREATED,
-    response_model=ReimbursementPublic,
+    response_model=ReimbursementCreatePublic,
     responses={401: {"model": Unauthorized}},
     summary="Create Reimbursement",
     description="Creates a new reimbursement request.",
@@ -80,16 +81,4 @@ async def update_reimbursement(
 ):
     return await service.update_reimbursement(reimbursement_id, reimbursement_update)
 
-
-@router.delete(
-    "/{reimbursement_id}",
-    status_code=HTTPStatus.NO_CONTENT,
-    responses={401: {"model": Unauthorized}},
-    summary="Delete Reimbursement",
-    description="Deletes a reimbursement.",
-)
-async def delete_reimbursement(
-    reimbursement_id: int = Path(..., description="ID of the reimbursement to delete"),
-    service: ReimbursementService = Depends(get_reimbursement_service),
-):
-    await service.delete_reimbursement(reimbursement_id)
+    return await service.update_reimbursement(reimbursement_id, reimbursement_update)

@@ -8,7 +8,6 @@ from schemas import (
     ReimbursementUpdate,
 )
 from common.rabbitMQ import get_reimbursements_rabbitmq
-from models import ReimbursementModel
 from common.postgres import paginate_query, get_db
 from typing import Optional
 
@@ -41,23 +40,16 @@ class ReimbursementService:
         return ReimbursementPublic.from_orm(reimbursement)
 
     async def create_reimbursement(self, reimbursement_in: ReimbursementCreate):
-        reimbursement = ReimbursementModel(
-            **reimbursement_in.dict(exclude={"expense_ids"})
-        )
-        self.db_session.add(reimbursement)
-        await self.db_session.commit()
-        await self.db_session.refresh(reimbursement)
-
         self.reimbursements_rabbitmq.publish(
-            message={
-                "event": "reimbursement.submitted",
-                "reimbursement_id": reimbursement.id,
-                "user_id": reimbursement.user_id,
-                "expense_ids": reimbursement_in.expense_ids,
-            },
+            message=reimbursement_in.dict(),
             routing_key="reimbursements.queue",
+            headers={
+                "event": "reimbursement.submitted",
+                "user": "1"
+            },
         )
-        return ReimbursementPublic.from_orm(reimbursement)
+
+        return {"message": f"Reimbursement request submitted for user {reimbursement_in.user_id}"}
 
     async def update_reimbursement(
         self, reimbursement_id: int, reimbursement_update: ReimbursementUpdate
@@ -75,18 +67,6 @@ class ReimbursementService:
         await self.db_session.commit()
         await self.db_session.refresh(reimbursement)
         return ReimbursementPublic.from_orm(reimbursement)
-
-    async def delete_reimbursement(self, reimbursement_id: int):
-        query = await self.db_session.execute(
-            select(ReimbursementModel).where(ReimbursementModel.id == reimbursement_id)
-        )
-        reimbursement = query.scalars().first()
-        if not reimbursement:
-            raise HTTPException(status_code=404, detail="Reimbursement not found")
-
-        await self.db_session.delete(reimbursement)
-        await self.db_session.commit()
-
 
 def get_reimbursement_service(
     db_session: AsyncSession = Depends(get_db), reimbursements_rabbitmq=Depends(get_reimbursements_rabbitmq)

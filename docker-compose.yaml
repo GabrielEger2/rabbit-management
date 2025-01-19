@@ -89,22 +89,16 @@ services:
               uvicorn main:app --host 0.0.0.0 --port 8005 --reload"
 
   reimbursements-worker:
-    build:
+    build: 
       context: .
       dockerfile: ./apps/workers/reimbursements/Dockerfile
     env_file:
       - ./apps/workers/reimbursements/.env
-    volumes:
-      - ./apps/workers/reimbursements:/usr/src/apps/workers/reimbursements
-      - ./common:/usr/src/apps/workers/reimbursements/common
     depends_on:
       - rabbitmq
-      - reimbursements
+    restart: "on-failure"
     networks:
       - kong-net
-    command: >
-      bash -c "sleep 30 &&
-              python reimbursements_worker.py"
 
   postgres-db:
     image: postgres:13
